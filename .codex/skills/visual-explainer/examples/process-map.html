@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How a new supplier gets approved</title>
+<!--
+  WORKED EXAMPLE — visual-explainer: PROCESS MAP (Blueprint style)
+
+  Read this before building any process, workflow, approval path or "how does X work" page.
+  Copy the patterns, not the content. What it shows:
+    · Headline answer first: the one-line summary + the three numbers that matter (hero strip)
+    · Swimlanes: one row per owner, one column per stage. Each step sits in its owner's lane,
+      so "who does what, in what order" is visible at a glance
+    · A decision point styled differently from ordinary steps, with its two outcomes named
+    · A "where it stalls" callout: the insight, not just the diagram
+    · Mobile: lanes collapse into a numbered list; the owner shows as a tag on each step
+    · Light and dark palettes chosen separately, not inverted; prints cleanly
+    · Entirely self-contained: system fonts, no links to anything outside this file
+-->
+<style>
+  :root {
+    --bg: #eef3f7;
+    --surface: #ffffff;
+    --lane: #e4ebf1;
+    --ink: #0e2233;
+    --ink-dim: #4b5f70;
+    --rule: #b9c7d3;
+    --accent: #0f6e8c;          /* the one structural accent */
+    --accent-soft: #d6ebf2;
+    --warn: #9a5b00;            /* used ONLY for the stall callout */
+    --warn-soft: #fbefd9;
+    --font-label: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+    --font-body: "Avenir Next", "Segoe UI", Candara, "Helvetica Neue", sans-serif;
+    --s1: 4px; --s2: 8px; --s3: 16px; --s4: 24px; --s5: 48px; --s6: 96px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b1a27;
+      --surface: #11283a;
+      --lane: #0f2232;
+      --ink: #e3eef6;
+      --ink-dim: #9db3c4;
+      --rule: #2b4a61;
+      --accent: #5cc3df;
+      --accent-soft: #123a4b;
+      --warn: #f2b660;
+      --warn-soft: #3a2a12;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    background: var(--bg);
+    background-image: linear-gradient(var(--rule) 1px, transparent 1px),
+                      linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-attachment: fixed;
+    color: var(--ink);
+    font: 16px/1.55 var(--font-body);
+    padding: var(--s5) var(--s3);
+  }
+  /* the grid texture is chrome; keep it faint */
+  body::before { content: ""; position: fixed; inset: 0; background: var(--bg); opacity: .88; z-index: -1; }
+  main { max-width: 1120px; margin: 0 auto; }
+
+  .eyebrow { font: 600 12px/1 var(--font-label); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: clamp(1.9rem, 4vw, 2.8rem); line-height: 1.15; margin: var(--s2) 0 var(--s3); text-wrap: balance; max-width: 22ch; }
+  .lede { max-width: 62ch; color: var(--ink-dim); font-size: 1.1rem; }
+
+  /* HERO STRIP — the three numbers a reader wants before the diagram */
+  .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--rule);
+           border: 1px solid var(--rule); margin: var(--s5) 0; }
+  .fact { background: var(--surface); padding: var(--s4); }
+  .fact b { display: block; font: 700 2.2rem/1 var(--font-body); font-variant-numeric: tabular-nums; }
+  .fact span { font: 12px/1.4 var(--font-label); color: var(--ink-dim); text-transform: uppercase; letter-spacing: .06em; }
+
+  h2 { font: 600 13px/1 var(--font-label); letter-spacing: .12em; text-transform: uppercase; margin-bottom: var(--s3);
+       display: flex; gap: var(--s2); align-items: center; }
+  h2::before { content: attr(data-ref); color: var(--accent); }
+
+  /* SWIMLANES — grid: first column = lane labels, then one column per stage */
+  .lanes { display: grid; grid-template-columns: 132px repeat(6, minmax(0, 1fr)); border: 1px solid var(--rule);
+           background: var(--surface); }
+  .stage-head { font: 11px/1.3 var(--font-label); color: var(--ink-dim); padding: var(--s2); border-bottom: 1px solid var(--rule);
+                text-transform: uppercase; letter-spacing: .06em; }
+  .lane-label { font: 600 12px/1.3 var(--font-label); padding: var(--s3) var(--s2); border-top: 1px solid var(--rule);
+                background: var(--lane); display: flex; align-items: center; }
+  .cell { border-top: 1px solid var(--rule); padding: var(--s2); min-height: 92px; position: relative; }
+  .step { background: var(--surface); border: 1.5px solid var(--ink); padding: var(--s2) 10px; height: 100%;
+          position: relative; }
+  .step h3 { font-size: .92rem; line-height: 1.25; margin-bottom: 2px; }
+  .step p { font-size: .8rem; line-height: 1.35; color: var(--ink-dim); }
+  .step .n { font: 600 11px/1 var(--font-label); color: var(--accent); display: block; margin-bottom: 4px; }
+  .step .owner { display: none; }
+  /* arrow into each step from the previous column */
+  .step.flow::before { content: ""; position: absolute; left: -12px; top: 50%; width: 10px; border-top: 1.5px solid var(--accent); }
+  .step.flow::after  { content: ""; position: absolute; left: -5px; top: calc(50% - 4px); border: 4px solid transparent;
+                       border-left: 5px solid var(--accent); }
+  /* the decision point: different shape language, names both outcomes */
+  .step.decision { border-style: dashed; border-color: var(--accent); background: var(--accent-soft); }
+  .outcomes { list-style: none; padding: 0; margin-top: 6px; font: 11px/1.4 var(--font-label); }
+  .outcomes li::before { content: "→ "; color: var(--accent); }
+  .step.optional { border-style: dotted; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: var(--s4); font: 12px/1.4 var(--font-label); color: var(--ink-dim); margin: var(--s3) 0 0; }
+  .key { display: inline-block; width: 22px; height: 12px; border: 1.5px solid var(--ink); vertical-align: -1px; margin-right: 6px; }
+  .key.d { border-style: dashed; border-color: var(--accent); background: var(--accent-soft); }
+  .key.o { border-style: dotted; }
+
+  /* THE INSIGHT — one callout, one warning colour, nowhere else */
+  .stall { margin: var(--s5) 0 0; border-left: 4px solid var(--warn); background: var(--warn-soft); padding: var(--s4); max-width: 75ch; }
+  .stall h2 { color: var(--warn); }
+  .stall h2::before { color: var(--warn); }
+  .stall p + p { margin-top: var(--s2); }
+
+  footer { margin-top: var(--s5); font: 12px/1.5 var(--font-label); color: var(--ink-dim); }
+
+  /* MOBILE — lanes become a numbered list; the owner moves onto each step */
+  @media (max-width: 760px) {
+    .facts { grid-template-columns: 1fr; }
+    .lanes { display: flex; flex-direction: column; gap: var(--s2); border: 0; background: none; }
+    .stage-head, .lane-label, .cell:empty { display: none; }
+    .cell { border: 0; padding: 0; min-height: 0; order: var(--o); }
+    .step .owner { display: inline-block; font: 600 10px/1 var(--font-label); text-transform: uppercase; letter-spacing: .06em;
+                   background: var(--lane); padding: 3px 6px; margin-top: 6px; }
+    .step.flow::before, .step.flow::after { display: none; }
+  }
+  @media print {
+    body { background: #fff; padding: 0; }
+    body::before { display: none; }
+    .lanes, .facts { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Procurement · process map</p>
+  <h1>How a new supplier gets approved</h1>
+  <p class="lede">Six steps across four teams. Low-risk suppliers take about a week; anything that touches client data
+    goes through legal and security review, which is where most of the time goes.</p>
+
+  <section class="facts" aria-label="Key numbers">
+    <div class="fact"><b>6–8 days</b><span>Typical, low-risk supplier</span></div>
+    <div class="fact"><b>4–6 weeks</b><span>Typical, high-risk supplier</span></div>
+    <div class="fact"><b>1 in 3</b><span>Requests that go high-risk</span></div>
+  </section>
+
+  <h2 data-ref="§1">The path, by who owns each step</h2>
+  <div class="lanes">
+    <!-- header row -->
+    <div class="stage-head" aria-hidden="true"></div>
+    <div class="stage-head" aria-hidden="true">1 · Ask</div>
+    <div class="stage-head" aria-hidden="true">2 · Screen</div>
+    <div class="stage-head" aria-hidden="true">3 · Review</div>
+    <div class="stage-head" aria-hidden="true">4 · Contract</div>
+    <div class="stage-head" aria-hidden="true">5 · Set up</div>
+    <div class="stage-head" aria-hidden="true">6 · Live</div>
+
+    <!-- lane: Requester -->
+    <div class="lane-label">Requester</div>
+    <div class="cell" style="--o:1"><div class="step">
+      <span class="n">01</span><h3>Submit request</h3><p>What, why, rough spend, whether it touches client data.</p>
+      <span class="owner">Requester</span></div></div>
+    <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <div class="cell" style="--o:7"><div class="step flow">
+      <span class="n">06</span><h3>Start using it</h3><p>Order through the finance system, never a card.</p>
+      <span class="owner">Requester</span></div></div>
+
+    <!-- lane: Procurement -->
+    <div class="lane-label">Procurement</div>
+    <div class="cell"></div>
+    <div class="cell" style="--o:2"><div class="step flow decision">
+      <span class="n">02 · decision</span><h3>Risk screen</h3>
+      <ul class="outcomes"><li>Low risk: skip to 04</li><li>Client data or &gt;$50k: step 03</li></ul>
+      <span class="owner">Procurement</span></div></div>
+    <div class="cell"></div>
+    <div class="cell" style="--o:5"><div class="step flow">
+      <span class="n">04</span><h3>Agree the contract</h3><p>Standard terms if low risk; legal's mark-up if not.</p>
+      <span class="owner">Procurement</span></div></div>
+    <div class="cell"></div><div class="cell"></div>
+
+    <!-- lane: Legal & Security -->
+    <div class="lane-label">Legal &amp; Security</div>
+    <div class="cell"></div><div class="cell"></div>
+    <div class="cell" style="--o:3"><div class="step flow optional">
+      <span class="n">03 · high risk only</span><h3>Legal + security review</h3><p>Data terms, questionnaire, sometimes a call with the supplier.</p>
+      <span class="owner">Legal &amp; Security</span></div></div>
+    <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+    <!-- lane: Finance -->
+    <div class="lane-label">Finance</div>
+    <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <div class="cell" style="--o:6"><div class="step flow">
+      <span class="n">05</span><h3>Add to the system</h3><p>Bank details verified by phone, not email.</p>
+      <span class="owner">Finance</span></div></div>
+    <div class="cell"></div>
+  </div>
+  <div class="legend">
+    <span><i class="key"></i>Every request</span>
+    <span><i class="key d"></i>Decision point</span>
+    <span><i class="key o"></i>Only on one branch</span>
+  </div>
+
+  <aside class="stall">
+    <h2 data-ref="§2">Where it stalls</h2>
+    <p><strong>Step 03 is most of the wait, and most of that is waiting for the supplier.</strong> The security questionnaire goes out,
+      and nobody chases it. Legal's own review takes two or three days once the answers are in.</p>
+    <p>Sending the questionnaire at step 01, whenever the requester ticks "client data", would start that clock about a week earlier.</p>
+  </aside>
+
+  <footer>Illustrative example · numbers are made up for this page</footer>
+</main>
+</body>
+</html>

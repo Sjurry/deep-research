@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who owns what when we take on a new client</title>
+<!--
+  WORKED EXAMPLE — visual-explainer: OWNERSHIP / STAKEHOLDER MAP (Editorial style)
+
+  Read this before building a who-owns-what map, a stakeholder map, a responsibilities grid,
+  an org or team explainer, or anything where the point is "who is on the hook for this".
+  Copy the patterns, not the content. What it shows:
+    · The finding leads: the gaps (things nobody owns) are the hero, before the grid
+    · A grid of activities × teams with two marks only: Owns (filled) and Involved (ring)
+    · Rows with no owner are flagged in the grid itself, in words, not just colour
+    · Rows with two owners are flagged too; shared ownership is often the same problem
+    · Grouped rows (before / during / after) with quiet group headings
+    · Editorial feel: serif headings, generous space, one restrained accent, a rule under sections
+-->
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --surface: #ffffff;
+    --ink: #1a1a18;
+    --ink-dim: #5e5b54;
+    --rule: #dcd8cf;
+    --accent: #7a2e2e;            /* claret: the single accent, used for gaps */
+    --accent-soft: #f4e7e4;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161513; --surface: #1d1c19; --ink: #efece6; --ink-dim: #aaa59b; --rule: #37342e;
+            --accent: #e0908a; --accent-soft: #3a2422; }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body { background: var(--bg); color: var(--ink); font: 17px/1.6 var(--sans); padding: 64px 16px 96px; }
+  main { max-width: 1040px; margin: 0 auto; }
+  .eyebrow { font: 600 12px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim); }
+  h1 { font: 400 clamp(2.1rem, 5vw, 3.6rem)/1.08 var(--serif); margin: 12px 0 20px; max-width: 18ch; text-wrap: balance; }
+  .lede { font-size: 1.15rem; max-width: 60ch; color: var(--ink-dim); }
+  h2 { font: 400 1.6rem/1.2 var(--serif); padding-bottom: 10px; border-bottom: 1px solid var(--rule); margin: 64px 0 24px; }
+
+  /* THE FINDING — gaps first, big, in the one accent */
+  .gaps { display: grid; grid-template-columns: 1.1fr 2fr; gap: 40px; margin-top: 48px; align-items: start; }
+  .gaps .count { font: 400 6rem/0.9 var(--serif); color: var(--accent); }
+  .gaps .count small { display: block; font: 600 12px/1.4 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim); margin-top: 12px; }
+  .gaps ol { padding-left: 1.2em; }
+  .gaps li { margin-bottom: 14px; max-width: 58ch; }
+  .gaps li strong { font-family: var(--serif); font-weight: 600; font-size: 1.1rem; }
+
+  /* THE GRID */
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 720px; background: var(--surface); }
+  th, td { padding: 12px 10px; border-bottom: 1px solid var(--rule); }
+  thead th { font: 600 12px/1.3 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-dim);
+             text-align: center; vertical-align: bottom; }
+  thead th:first-child { text-align: left; }
+  thead th:not(:first-child) { width: 13%; }
+  tbody th { text-align: left; font-weight: 400; width: 34%; }
+  td { text-align: center; position: relative; }  /* anchors the hidden screen-reader labels */
+  tr.group th { font: italic 400 1.05rem/1.2 var(--serif); color: var(--ink-dim); padding-top: 28px; border-bottom: 0; }
+  .own, .inv { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; }
+  .own { background: var(--ink); }
+  .inv { border: 2px solid var(--ink-dim); }
+  tr.gap th, tr.gap td { background: var(--accent-soft); }
+  tr.gap th::after, tr.shared th::after { display: block; font: 700 11px/1.4 var(--sans); letter-spacing: .08em; text-transform: uppercase;
+                                          color: var(--accent); margin-top: 2px; }
+  tr.gap th::after { content: "No owner"; }
+  tr.shared th::after { content: "Two owners"; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  .key { display: flex; gap: 28px; flex-wrap: wrap; font-size: .9rem; color: var(--ink-dim); margin-top: 16px; }
+  .key span { display: inline-flex; gap: 8px; align-items: center; }
+  footer { margin-top: 64px; font-size: .85rem; color: var(--ink-dim); }
+  @media (max-width: 720px) { .gaps { grid-template-columns: 1fr; gap: 16px; } .gaps .count { font-size: 4.5rem; } }
+  @media print { body { padding: 0; } .scroll { overflow: visible; } }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Client onboarding · responsibilities</p>
+  <h1>Who owns what when we take on a new client</h1>
+  <p class="lede">Twelve things have to happen between "yes" and the first piece of work. Five teams touch them.
+    Most have a clear owner. Three have none, and those are the three that went wrong last quarter.</p>
+
+  <section class="gaps" aria-label="Unowned activities">
+    <div class="count">3<small>Activities nobody owns</small></div>
+    <ol>
+      <li><strong>Telling the client who their contacts are.</strong> Everyone assumes the relationship lead does it. They assume the welcome pack does.</li>
+      <li><strong>Checking the engagement letter matches what was scoped.</strong> Risk checks the terms and the team checks the scope, but nobody compares the two.</li>
+      <li><strong>Closing the loop after the first invoice.</strong> Finance sends it, the team never hears whether it landed well.</li>
+    </ol>
+  </section>
+
+  <h2>The full picture</h2>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th scope="col">Activity</th><th scope="col">Relationship lead</th><th scope="col">Delivery team</th>
+            <th scope="col">Risk</th><th scope="col">Finance</th><th scope="col">IT</th></tr>
+      </thead>
+      <tbody>
+        <tr class="group"><th colspan="6" scope="colgroup">Before we start</th></tr>
+        <tr><th scope="row">Conflict check</th><td></td><td></td><td><i class="own"></i><span class="sr">owns</span></td><td></td><td></td></tr>
+        <tr><th scope="row">Agree scope and fee</th><td><i class="own"></i><span class="sr">owns</span></td><td><i class="inv"></i><span class="sr">involved</span></td><td></td><td><i class="inv"></i><span class="sr">involved</span></td><td></td></tr>
+        <tr><th scope="row">Issue engagement letter</th><td></td><td></td><td><i class="own"></i><span class="sr">owns</span></td><td></td><td></td></tr>
+        <tr class="gap"><th scope="row">Check letter matches scope</th><td><i class="inv"></i><span class="sr">involved</span></td><td><i class="inv"></i><span class="sr">involved</span></td><td><i class="inv"></i><span class="sr">involved</span></td><td></td><td></td></tr>
+
+        <tr class="group"><th colspan="6" scope="colgroup">First two weeks</th></tr>
+        <tr><th scope="row">Set up client in systems</th><td></td><td></td><td></td><td><i class="own"></i><span class="sr">owns</span></td><td><i class="inv"></i><span class="sr">involved</span></td></tr>
+        <tr><th scope="row">Shared workspace and access</th><td></td><td><i class="inv"></i><span class="sr">involved</span></td><td></td><td></td><td><i class="own"></i><span class="sr">owns</span></td></tr>
+        <tr class="gap"><th scope="row">Tell client who their contacts are</th><td><i class="inv"></i><span class="sr">involved</span></td><td><i class="inv"></i><span class="sr">involved</span></td><td></td><td></td><td></td></tr>
+        <tr class="shared"><th scope="row">Kick-off meeting</th><td><i class="own"></i><span class="sr">owns</span></td><td><i class="own"></i><span class="sr">owns</span></td><td></td><td></td><td></td></tr>
+        <tr><th scope="row">Brief the team on the client</th><td><i class="own"></i><span class="sr">owns</span></td><td><i class="inv"></i><span class="sr">involved</span></td><td></td><td></td><td></td></tr>
+
+        <tr class="group"><th colspan="6" scope="colgroup">First month</th></tr>
+        <tr><th scope="row">First deliverable</th><td><i class="inv"></i><span class="sr">involved</span></td><td><i class="own"></i><span class="sr">owns</span></td><td></td><td></td><td></td></tr>
+        <tr><th scope="row">First invoice</th><td><i class="inv"></i><span class="sr">involved</span></td><td></td><td></td><td><i class="own"></i><span class="sr">owns</span></td><td></td></tr>
+        <tr class="gap"><th scope="row">Close the loop after the first invoice</th><td></td><td></td><td></td><td><i class="inv"></i><span class="sr">involved</span></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="key">
+    <span><i class="own"></i>Owns it: answerable if it doesn't happen</span>
+    <span><i class="inv"></i>Involved: does part of the work or is consulted</span>
+  </div>
+
+  <footer>Illustrative example · the teams and activities are made up for this page</footer>
+</main>
+</body>
+</html>
